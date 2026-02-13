@@ -1,20 +1,15 @@
 /** @format */
-
 "use client";
 
-import React, { useEffect } from "react";
-import Link from "next/link";
+import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import {
-    LayoutDashboard,
-    Users,
-    Boxes,
-    Layers,
-    LogOut,
-    Loader2,
-} from "lucide-react";
 
-import { useMe, useLogout } from "@/src/features/auth/hooks";
+import AdminSidebar from "@/src/components/admin/AdminSidebar";
+import AdminNavbar from "@/src/components/admin/AdminNavbar";
+import { useTheme } from "@/src/providers/ThemeProvider";
+import { useLogout, useMe } from "@/src/features/auth/hooks";
+import { useGlobalLoading } from "@/src/components/loading/GlobalLoadingProvider";
+import Preloader from "@/src/components/Preloader";
 
 export default function AdminLayout({
     children,
@@ -22,121 +17,66 @@ export default function AdminLayout({
     children: React.ReactNode;
 }) {
     const router = useRouter();
-    const { data, isLoading } = useMe();
+    const { darkMode, toggle } = useTheme();
+
+    const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+    const { show, hide } = useGlobalLoading();
+
+    const meQuery = useMe();
     const logoutMut = useLogout();
 
-    const user = data?.user;
+    const user = meQuery.data?.user;
 
-    // 🔐 Protect route (only admin)
     useEffect(() => {
-        if (!isLoading) {
-            if (!user) {
-                router.replace("/login");
-            } else if (user.role !== "admin") {
-                router.replace("/");
-            }
+        if (meQuery.isLoading) return;
+
+        if (!user) {
+            router.replace("/login");
+            return;
         }
-    }, [user, isLoading, router]);
+        if (user.role !== "admin") {
+            router.replace("/");
+            return;
+        }
+    }, [meQuery.isLoading, user, router]);
 
     const handleLogout = async () => {
-        // ✅ prevent login page redirect effect from firing for 1s
-        localStorage.setItem("just_logged_out", "1");
-        await logoutMut.mutateAsync();
-        router.replace("/login");
+        try {
+            show();
+            localStorage.setItem("just_logged_out", "1");
+            await logoutMut.mutateAsync();
+            router.replace("/login");
+        } finally {
+            hide();
+        }
     };
 
-    if (isLoading || !user) {
-        return (
-            <div className='min-h-screen flex items-center justify-center bg-zinc-950 text-white'>
-                <Loader2 className='animate-spin' />
-            </div>
-        );
-    }
-
-    if (!user) {
-        return null; // ✅ don't render layout while redirecting to /login
-    }
+    if (meQuery.isLoading) return <Preloader />;
+    if (!user) return null;
 
     return (
-        <div className='min-h-screen flex bg-zinc-950 text-white'>
-            {/* Sidebar */}
-            <aside className='w-64 border-r border-white/10 bg-black/40 backdrop-blur-xl p-6 flex flex-col justify-between'>
-                <div>
-                    <div className='mb-10'>
-                        <h1 className='text-lg font-black tracking-tight'>
-                            POSH BY REGNO
-                        </h1>
-                        <p className='text-[10px] uppercase tracking-[0.35em] text-zinc-500 mt-1'>
-                            Superadmin Panel
-                        </p>
-                    </div>
+        <div className='min-h-screen flex bg-[#F8FAFC] dark:bg-[#020617] transition-colors duration-700'>
+            <AdminSidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
 
-                    <nav className='space-y-3 text-sm'>
-                        <Link
-                            href='/admin/dashboard'
-                            className='flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/10 transition'
-                        >
-                            <LayoutDashboard size={16} />
-                            Dashboard
-                        </Link>
+            <div
+                className={`
+          flex-1 flex flex-col min-w-0 overflow-hidden transition-all duration-500 ease-in-out
+          ${isSidebarOpen ? "md:ml-72" : "md:ml-24"} ml-0
+        `}
+            >
+                <AdminNavbar
+                    user={user}
+                    onLogout={handleLogout}
+                    toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
+                    darkMode={darkMode}
+                    onToggleTheme={toggle}
+                    isLoggingOut={logoutMut.isPending}
+                />
 
-                        <Link
-                            href='/admin/manage-user'
-                            className='flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/10 transition'
-                        >
-                            <Users size={16} />
-                            Manage Users
-                        </Link>
-
-                        <Link
-                            href='/admin/category'
-                            className='flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/10 transition'
-                        >
-                            <Layers size={16} />
-                            Categories
-                        </Link>
-
-                        <Link
-                            href='/admin/products'
-                            className='flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/10 transition'
-                        >
-                            <Boxes size={16} />
-                            Products
-                        </Link>
-                    </nav>
-                </div>
-
-                {/* Bottom Section */}
-                <div className='space-y-4'>
-                    <div className='text-xs text-zinc-400'>
-                        <p className='font-black'>{user.name}</p>
-                        <p className='uppercase tracking-widest text-[9px] text-zinc-600'>
-                            {user.role}
-                        </p>
-                    </div>
-
-                    <button
-                        onClick={handleLogout}
-                        disabled={logoutMut.isPending}
-                        className='w-full flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-xs font-black uppercase tracking-wider hover:bg-white/10 disabled:opacity-50'
-                    >
-                        {logoutMut.isPending ? (
-                            <>
-                                <Loader2 size={14} className='animate-spin' />
-                                Logging out
-                            </>
-                        ) : (
-                            <>
-                                <LogOut size={14} />
-                                Logout
-                            </>
-                        )}
-                    </button>
-                </div>
-            </aside>
-
-            {/* Main Content */}
-            <main className='flex-1 p-10'>{children}</main>
+                <main className='flex-1 p-8 lg:p-14 bg-[#F8FAFC] dark:bg-[#020617] transition-colors duration-700'>
+                    {children}
+                </main>
+            </div>
         </div>
     );
 }

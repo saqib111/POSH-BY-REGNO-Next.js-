@@ -1,3 +1,62 @@
 /** @format */
 
 @import "tailwindcss";
+
+/* ✅ IMPORTANT: enable class-based dark variant in Tailwind v4 */
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+    background-color: #f8fafc;
+}
+
+.dark {
+    background-color: #020617;
+}
+
+/* Optional: smooth transitions */
+html,
+body {
+    transition:
+        background-color 0.5s ease,
+        color 0.3s ease;
+}
+button,
+a,
+input,
+textarea,
+select,
+div,
+section,
+main,
+header,
+aside {
+    transition:
+        background-color 0.5s ease,
+        border-color 0.5s ease,
+        color 0.3s ease;
+}
+
+@keyframes shimmer {
+    0% {
+        transform: translateX(-120%);
+    }
+    100% {
+        transform: translateX(120%);
+    }
+}
+
+/* ✅ reusable shimmer layer */
+.shimmer-layer {
+    position: absolute;
+    top: 0;
+    left: -120%;
+    height: 100%;
+    width: 50%;
+    transform: skewX(-12deg);
+    pointer-events: none;
+    animation: none;
+}
+
+.group:hover .shimmer-layer {
+    animation: shimmer 1.5s linear infinite;
+}
