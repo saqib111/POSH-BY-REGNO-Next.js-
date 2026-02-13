@@ -4,7 +4,8 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
 import {
     Crown,
     Mail,
@@ -48,39 +49,46 @@ type BackendErrorShape = {
     errors?: Record<string, string[]>;
 };
 
+type LoginForm = {
+    email: string;
+    password: string;
+};
+
 export default function LoginPage() {
     const router = useRouter();
     const loginMut = useLogin();
     const meQuery = useMe();
 
     const [googleLoading, setGoogleLoading] = useState(false);
-
-    const [form, setForm] = useState({
-        email: "",
-        password: "",
-    });
-
-    const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
     const [topError, setTopError] = useState<string>("");
 
-    const isSubmitting = loginMut.isPending;
+    const {
+        register,
+        handleSubmit,
+        setError,
+        formState: { errors },
+    } = useForm<LoginForm>({
+        mode: "onSubmit", // ✅ show frontend errors only when clicking submit
+        defaultValues: {
+            email: "",
+            password: "",
+        },
+    });
 
-    const emailError = fieldErrors.email;
-    const passwordError = fieldErrors.password;
+    const isSubmitting = loginMut.isPending;
 
     // If already logged in, redirect away from login
     useEffect(() => {
         const justLoggedOut = localStorage.getItem("just_logged_out") === "1";
 
         if (justLoggedOut) {
-            // ✅ remove flag after short time
             setTimeout(() => localStorage.removeItem("just_logged_out"), 1000);
             return;
         }
 
         const user = meQuery.data?.user;
 
-        if (meQuery.isLoading) return; // ✅ wait until query resolves
+        if (meQuery.isLoading) return;
         if (!user) return;
 
         if (user.role === "admin" || user.role === "manager") {
@@ -90,38 +98,20 @@ export default function LoginPage() {
         }
     }, [meQuery.isLoading, meQuery.data, router]);
 
-    const canSubmit = useMemo(() => {
-        return (
-            form.email.trim().length > 0 &&
-            form.password.length > 0 &&
-            !isSubmitting
-        );
-    }, [form.email, form.password, isSubmitting]);
-
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setTopError("");
-        setFieldErrors((p) => ({ ...p, [e.target.name]: "" }));
-        setForm((p) => ({ ...p, [e.target.name]: e.target.value }));
-    };
-
     const handleGoogleLogin = () => {
         setGoogleLoading(true);
-        // Adjust port if your backend runs on 127.0.0.1:8000
         window.location.href = `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/auth/google/redirect`;
     };
 
-    const onSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
+    const onSubmit = async (values: LoginForm) => {
         setTopError("");
-        setFieldErrors({});
 
         try {
             await loginMut.mutateAsync({
-                email: form.email,
-                password: form.password,
+                email: values.email,
+                password: values.password,
             });
 
-            // Refresh /me after login
             const res = await meQuery.refetch();
             const user = res.data?.user;
 
@@ -134,33 +124,47 @@ export default function LoginPage() {
             const resData: BackendErrorShape | undefined = err?.response?.data;
             const status: number | undefined = err?.response?.status;
 
-            // Suspended → redirect to suspended page (you can create later)
             if (resData?.code === "ACCOUNT_SUSPENDED") {
                 router.replace("/suspended-user");
                 return;
             }
 
-            // Email not verified → redirect to verify-email page with email query
             if (
                 status === 403 &&
                 (resData?.code === "EMAIL_NOT_VERIFIED" ||
                     (resData?.message || "").toLowerCase().includes("verify"))
             ) {
-                const email = resData?.email || form.email;
+                const email = resData?.email || values.email;
                 router.replace(
                     `/verify-email?email=${encodeURIComponent(email)}`,
                 );
                 return;
             }
 
-            // Validation errors
+            // ✅ Server validation errors -> map to react-hook-form fields
             if (resData?.errors) {
                 const eobj = resData.errors;
-                const next: Record<string, string> = {};
-                Object.keys(eobj).forEach((k) => {
-                    next[k] = eobj[k]?.[0] || "Invalid value";
-                });
-                setFieldErrors(next);
+                if (eobj.email?.[0]) {
+                    setError("email", {
+                        type: "server",
+                        message: eobj.email[0],
+                    });
+                }
+                if (eobj.password?.[0]) {
+                    setError("password", {
+                        type: "server",
+                        message: eobj.password[0],
+                    });
+                }
+                // if backend returns some other key, show top error
+                const otherKeys = Object.keys(eobj).filter(
+                    (k) => k !== "email" && k !== "password",
+                );
+                if (otherKeys.length) {
+                    setTopError(
+                        eobj[otherKeys[0]]?.[0] || "Validation failed.",
+                    );
+                }
                 return;
             }
 
@@ -245,7 +249,11 @@ export default function LoginPage() {
                         ) : null}
                     </div>
 
-                    <form onSubmit={onSubmit} className='space-y-7'>
+                    {/* ✅ react-hook-form submit */}
+                    <form
+                        onSubmit={handleSubmit(onSubmit)}
+                        className='space-y-7'
+                    >
                         {/* Email */}
                         <div className='space-y-2 group'>
                             <label className='text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1 group-focus-within:text-amber-500 transition-colors'>
@@ -258,17 +266,21 @@ export default function LoginPage() {
                                     size={18}
                                 />
                                 <input
-                                    name='email'
-                                    value={form.email}
-                                    onChange={handleChange}
+                                    {...register("email", {
+                                        required: "Email is required",
+                                        pattern: {
+                                            value: /^\S+@\S+\.\S+$/,
+                                            message: "Enter a valid email",
+                                        },
+                                    })}
                                     className='w-full bg-white/5 border border-white/10 p-4 pl-12 rounded-2xl text-white text-sm outline-none focus:bg-white/10 focus:border-amber-600/50 transition-all placeholder:text-slate-700'
                                     type='email'
                                     placeholder='Enter Email'
                                     autoComplete='email'
                                 />
-                                {emailError ? (
+                                {errors.email?.message ? (
                                     <span className='absolute right-4 top-1/2 -translate-y-1/2 text-[9px] text-rose-500 font-black uppercase tracking-tighter'>
-                                        {emailError}
+                                        {errors.email.message}
                                     </span>
                                 ) : null}
                             </div>
@@ -295,31 +307,35 @@ export default function LoginPage() {
                                     size={18}
                                 />
                                 <input
-                                    name='password'
-                                    value={form.password}
-                                    onChange={handleChange}
+                                    {...register("password", {
+                                        required: "Password is required",
+                                        minLength: {
+                                            value: 6,
+                                            message: "Minimum 6 characters",
+                                        },
+                                    })}
                                     className='w-full bg-white/5 border border-white/10 p-4 pl-12 rounded-2xl text-white text-sm outline-none focus:bg-white/10 focus:border-amber-600/50 transition-all placeholder:text-slate-700'
                                     type='password'
                                     placeholder='••••••••'
                                     autoComplete='current-password'
                                 />
-                                {passwordError ? (
+                                {errors.password?.message ? (
                                     <span className='absolute right-4 top-1/2 -translate-y-1/2 text-[9px] text-rose-500 font-black uppercase tracking-tighter'>
-                                        {passwordError}
+                                        {errors.password.message}
                                     </span>
                                 ) : null}
                             </div>
                         </div>
 
-                        {/* Submit */}
+                        {/* Submit (✅ enabled unless submitting) */}
                         <button
-                            disabled={!canSubmit}
+                            disabled={isSubmitting}
                             type='submit'
                             className={`w-full mt-4 p-5 rounded-2xl shadow-[0_10px_30px_rgba(217,119,6,0.3)]
                 font-black uppercase tracking-[0.4em] text-[10px]
                 flex items-center justify-center gap-3 transition-all duration-500
                 ${
-                    !canSubmit
+                    isSubmitting
                         ? "bg-amber-600/70 text-white cursor-not-allowed"
                         : "bg-linear-to-r from-amber-600 to-amber-500 hover:from-white hover:to-white text-white hover:text-black hover:shadow-[0_10px_40px_rgba(255,255,255,0.2)]"
                 }`}
