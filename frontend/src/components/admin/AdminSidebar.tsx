@@ -241,20 +241,18 @@ export default function AdminSidebar({ isOpen, setIsOpen }: Props) {
                 {/* Bottom card */}
                 {isOpen && (
                     <div className='mx-4 mb-6 mt-auto'>
-                        <div className='group relative cursor-pointer transition-all duration-300 active:scale-95'>
-                            {/* Subtle Glow Backdrop */}
+                        <div className='group relative cursor-pointer active:scale-95 transition-all duration-300'>
+                            {/* Glow */}
                             <div className='absolute -inset-2 bg-indigo-500/10 opacity-0 blur-xl transition-opacity duration-500 group-hover:opacity-100 dark:bg-indigo-400/5' />
 
-                            {/* Main Container */}
-                            <div className='relative flex items-center justify-between overflow-hidden rounded-2xl border border-slate-200/80 bg-white/70 p-3 shadow-sm backdrop-blur-xl transition-all duration-300 hover:border-indigo-500/30 hover:shadow-md dark:border-slate-800/80 dark:bg-slate-900/90'>
-                                {/* Shimmer Effect */}
-                                <div className='absolute -inset-full top-0 block h-full w-1/2 -skew-x-12 bg-linear-to-r from-transparent via-white/20 to-transparent group-hover:animate-[shimmer_1.5s_infinite] dark:via-white/5' />
+                            {/* Main Card */}
+                            <div className='relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white/70 p-3 shadow-sm backdrop-blur-xl transition-all duration-300 hover:border-indigo-500/30 hover:shadow-md dark:border-slate-800/80 dark:bg-slate-900/90 flex items-center justify-between'>
+                                {/* ✅ SHIMMER */}
+                                <div className='shimmer-layer' />
 
                                 <div className='flex items-center gap-4'>
-                                    {/* Icon Section with Dot-Grid Pattern */}
+                                    {/* Icon */}
                                     <div className='relative flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-slate-50 ring-1 ring-slate-200 dark:bg-slate-800 dark:ring-slate-700'>
-                                        <div className='absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_1px_1px,var(--tw-gradient-from)_1px,transparent_0)] from-slate-400 bg-size-[6px_6px] dark:from-slate-500' />
-
                                         <svg
                                             className='relative h-6 w-6 text-indigo-600 dark:text-indigo-400'
                                             fill='none'
@@ -269,15 +267,18 @@ export default function AdminSidebar({ isOpen, setIsOpen }: Props) {
                                             />
                                         </svg>
 
+                                        {/* Status Dot */}
                                         <div className='absolute -bottom-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-white dark:bg-slate-900'>
                                             <div className='h-2.5 w-2.5 animate-pulse rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)]' />
                                         </div>
                                     </div>
 
+                                    {/* Text */}
                                     <div className='flex flex-col space-y-0.5'>
                                         <span className='text-[13px] font-bold tracking-tight text-slate-800 dark:text-slate-100'>
                                             Superadmin
                                         </span>
+
                                         <div className='flex items-center gap-1.5'>
                                             <span className='text-[10px] font-medium tracking-wide text-slate-500/80 dark:text-slate-400'>
                                                 System Active
@@ -287,6 +288,7 @@ export default function AdminSidebar({ isOpen, setIsOpen }: Props) {
                                     </div>
                                 </div>
 
+                                {/* PRO Badge */}
                                 <div className='px-2'>
                                     <div className='rounded-lg border border-indigo-100 bg-indigo-50/50 px-3 py-1 text-[10px] font-extrabold tracking-widest text-indigo-600 transition-colors duration-300 group-hover:bg-indigo-600 group-hover:text-white dark:border-indigo-500/20 dark:bg-indigo-500/10 dark:text-indigo-400'>
                                         PRO

@@ -26,9 +26,12 @@ class UserFactory extends Factory
         return [
             'name' => fake()->name(),
             'email' => fake()->unique()->safeEmail(),
-            'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
+            'status' => fake()->randomElement(['active', 'suspended']),
+            'role' => fake()->randomElement(['admin', 'manager', 'employee']),
+            'profile_pic' => null, // Let the frontend handle the UI-Avatar fallback
             'remember_token' => Str::random(10),
+            'created_at' => fake()->dateTimeBetween('-1 year', 'now'),
         ];
     }
 
@@ -37,7 +40,7 @@ class UserFactory extends Factory
      */
     public function unverified(): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn(array $attributes) => [
             'email_verified_at' => null,
         ]);
     }

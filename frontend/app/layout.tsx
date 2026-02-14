@@ -5,6 +5,7 @@ import "./globals.css";
 import Providers from "./providers";
 import { ThemeProvider } from "@/src/providers/ThemeProvider";
 import { GlobalLoadingProvider } from "@/src/components/loading/GlobalLoadingProvider";
+import { Toaster } from "react-hot-toast";
 
 export const metadata: Metadata = { title: "POSH BY REGNO" };
 
@@ -37,6 +38,16 @@ export default function RootLayout({
                     <ThemeProvider>
                         <GlobalLoadingProvider>
                             {children}
+                            <Toaster
+                                position='top-right'
+                                toastOptions={{
+                                    duration: 3500,
+                                    style: {
+                                        borderRadius: "16px",
+                                        padding: "12px 14px",
+                                    },
+                                }}
+                            />
                         </GlobalLoadingProvider>
                     </ThemeProvider>
                 </Providers>

@@ -36,27 +36,45 @@ aside {
         color 0.3s ease;
 }
 
+/* ============================= */
+/* SHIMMER ANIMATION */
+/* ============================= */
+
 @keyframes shimmer {
     0% {
-        transform: translateX(-120%);
+        transform: translateX(-150%);
     }
     100% {
-        transform: translateX(120%);
+        transform: translateX(150%);
     }
 }
 
-/* ✅ reusable shimmer layer */
 .shimmer-layer {
     position: absolute;
-    top: 0;
-    left: -120%;
-    height: 100%;
-    width: 50%;
-    transform: skewX(-12deg);
+    inset: 0;
+    width: 60%;
+    transform: translateX(-150%) skewX(-20deg);
+    background: linear-gradient(
+        110deg,
+        transparent 25%,
+        rgba(255, 255, 255, 0.35) 50%,
+        transparent 75%
+    );
     pointer-events: none;
-    animation: none;
+    z-index: 20;
 }
 
+/* Dark mode shimmer */
+.dark .shimmer-layer {
+    background: linear-gradient(
+        110deg,
+        transparent 25%,
+        rgba(255, 255, 255, 0.08) 50%,
+        transparent 75%
+    );
+}
+
+/* Hover trigger */
 .group:hover .shimmer-layer {
-    animation: shimmer 1.5s linear infinite;
+    animation: shimmer 1.4s ease-in-out infinite;
 }
