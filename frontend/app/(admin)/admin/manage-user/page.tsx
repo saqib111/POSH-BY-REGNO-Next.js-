@@ -16,66 +16,77 @@ import { useQuery } from "@tanstack/react-query";
 
 import RowsPerPageDropdown from "@/src/features/admin/RowsPerPageDropdown";
 import UserTable from "@/src/features/admin/users/components/UserTable";
+import UserModalsManager, {
+    useUserModalsManager,
+} from "@/src/features/admin/users/components/UserModalsManager";
 import CreateUserModal from "@/src/features/admin/users/modals/CreateUserModal";
+
+import { usersApi } from "@/src/features/admin/users/api";
+import type { AdminUser } from "@/src/features/admin/users/types";
+
 import { useCreateUserMutation } from "@/src/features/admin/users/hooks/useCreateUserMutation";
-import api from "@/src/lib/axios/client";
-
-// ✅ API fetcher (Next.js client)
-const fetchUsers = async ({
-    queryKey,
-}: {
-    queryKey: [string, number, number, string];
-}) => {
-    const [_key, page, limit, search] = queryKey;
-
-    const res = await api.get("/admin/users", {
-        params: { page, limit, search },
-    });
-
-    return res.data;
-};
+import { useUserStatusMutation } from "@/src/features/admin/users/hooks/useUserStatusMutation";
+import { useDeleteUserMutation } from "@/src/features/admin/users/hooks/useDeleteUserMutation";
+import { useUpdateUserMutation } from "@/src/features/admin/users/hooks/useUpdateUserMutation";
+import { useUpdateUserPasswordMutation } from "@/src/features/admin/users/hooks/useUpdateUserPasswordMutation";
 
 const ManageUserPage = () => {
-    // --- UI STATE ---
+    // UI
     const [searchInput, setSearchInput] = useState("");
     const [search, setSearch] = useState("");
     const [page, setPage] = useState(1);
     const [limit, setLimit] = useState(10);
 
-    // --- MODAL STATE ---
+    // modals
+    const modals = useUserModalsManager();
     const [createOpen, setCreateOpen] = useState(false);
 
+    // mutations
     const createMutation = useCreateUserMutation({
         onClose: () => setCreateOpen(false),
     });
+    const statusMutation = useUserStatusMutation({ onClose: modals.close });
+    const deleteMutation = useDeleteUserMutation({ onClose: modals.close });
+    const updateMutation = useUpdateUserMutation({ onClose: modals.close });
+    const passwordMutation = useUpdateUserPasswordMutation({
+        onClose: modals.close,
+    });
 
-    // ✅ Debounce search
+    // debounce search
     const debounceMs = 500;
     const debouncedSetter = useMemo(() => {
-        let t: any;
+        let t: ReturnType<typeof setTimeout> | undefined;
         return (value: string) => {
-            clearTimeout(t);
+            if (t) clearTimeout(t);
             t = setTimeout(() => setSearch(value), debounceMs);
         };
     }, []);
 
     const { data, isLoading, isFetching, isError, error } = useQuery({
         queryKey: ["adminUsers", page, limit, search] as const,
-        queryFn: fetchUsers,
-        placeholderData: (prev) => prev, // keepPreviousData alternative in v5 style
+        queryFn: ({ queryKey }) => {
+            const [_k, p, l, s] = queryKey;
+            return usersApi.list({ page: p, limit: l, search: s });
+        },
+        placeholderData: (prev) => prev,
         staleTime: 30 * 1000,
     });
 
     const users = data?.users ?? [];
     const totalPages = data?.totalPages ?? 1;
     const totalUsers = data?.totalUsers ?? 0;
-
     const loading = isLoading || isFetching;
 
     const handleLimitChange = (newLimit: number) => {
         setLimit(newLimit);
         setPage(1);
     };
+
+    const disableActions =
+        statusMutation.isPending ||
+        deleteMutation.isPending ||
+        updateMutation.isPending ||
+        passwordMutation.isPending;
 
     return (
         <div className='space-y-10'>
@@ -175,6 +186,37 @@ const ManageUserPage = () => {
                 page={page}
                 limit={limit}
                 search={search}
+                onToggleStatus={(u: AdminUser) => modals.open("toggle", u)}
+                onDelete={(u: AdminUser) => modals.open("delete", u)}
+                onEdit={(u: AdminUser) => modals.open("edit", u)}
+                onPassword={(u: AdminUser) => modals.open("password", u)}
+                disableActions={disableActions}
+                statusLoadingId={null}
+            />
+
+            {/* Modals (single place) */}
+            <UserModalsManager
+                modal={modals.modal}
+                user={modals.user}
+                close={modals.close}
+                toggleLoading={statusMutation.isPending}
+                deleteLoading={deleteMutation.isPending}
+                editLoading={updateMutation.isPending}
+                passwordLoading={passwordMutation.isPending}
+                onToggleConfirm={(u) =>
+                    statusMutation.mutate({
+                        userId: u.id,
+                        nextStatus:
+                            u.status === "active" ? "suspended" : "active",
+                    })
+                }
+                onDeleteConfirm={(u) => deleteMutation.mutate({ userId: u.id })}
+                onEditConfirm={(u, payload) =>
+                    updateMutation.mutate({ userId: u.id, payload })
+                }
+                onPasswordConfirm={(u, payload) =>
+                    passwordMutation.mutate({ userId: u.id, payload })
+                }
             />
 
             {/* Pagination */}
@@ -243,6 +285,7 @@ const NavButton = ({
     icon: React.ReactNode;
 }) => (
     <button
+        type='button'
         onClick={onClick}
         disabled={disabled}
         className='

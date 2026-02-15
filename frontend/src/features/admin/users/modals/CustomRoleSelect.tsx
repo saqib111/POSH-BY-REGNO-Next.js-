@@ -2,9 +2,8 @@
 
 "use client";
 
-/** @format */
-
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import {
     ChevronDown,
     Shield,
@@ -14,13 +13,8 @@ import {
     type LucideIcon,
 } from "lucide-react";
 
-type RoleValue = "admin" | "manager" | "employee" | string;
-
-type RoleOption = {
-    value: RoleValue;
-    label: string;
-    icon: LucideIcon;
-};
+type RoleValue = "admin" | "manager" | "employee" | (string & {});
+type RoleOption = { value: RoleValue; label: string; icon: LucideIcon };
 
 const ROLE_OPTIONS: RoleOption[] = [
     { value: "admin", label: "Admin", icon: Crown },
@@ -35,6 +29,8 @@ type CustomRoleSelectProps = {
     error?: string;
 };
 
+type Pos = { top: number; left: number; width: number };
+
 export default function CustomRoleSelect({
     value,
     onChange,
@@ -42,7 +38,10 @@ export default function CustomRoleSelect({
     error,
 }: CustomRoleSelectProps) {
     const [open, setOpen] = useState(false);
-    const wrapRef = useRef<HTMLDivElement | null>(null);
+    const [pos, setPos] = useState<Pos | null>(null);
+
+    const triggerRef = useRef<HTMLButtonElement | null>(null);
+    const panelRef = useRef<HTMLDivElement | null>(null);
 
     const current = useMemo(() => {
         return ROLE_OPTIONS.find((r) => r.value === value) || ROLE_OPTIONS[2];
@@ -50,35 +49,171 @@ export default function CustomRoleSelect({
 
     const CurrentIcon = current.icon;
 
-    // Close on outside click
+    const computePos = () => {
+        const btn = triggerRef.current;
+        if (!btn) return;
+
+        const rect = btn.getBoundingClientRect();
+        setPos({
+            top: rect.bottom + 12, // mt-3 = 12px
+            left: rect.left,
+            width: rect.width,
+        });
+    };
+
+    // Open + compute position
+    const toggleOpen = () => {
+        if (disabled) return;
+        setOpen((v) => {
+            const next = !v;
+            if (next) {
+                // compute on next frame for accurate layout
+                requestAnimationFrame(computePos);
+            }
+            return next;
+        });
+    };
+
+    // Keep aligned on scroll / resize while open
     useEffect(() => {
-        const onDocClick = (e: MouseEvent) => {
-            if (!open) return;
-            const el = wrapRef.current;
-            if (!el) return;
-            if (!el.contains(e.target as Node)) setOpen(false);
+        if (!open) return;
+
+        const onReflow = () => computePos();
+        window.addEventListener("resize", onReflow);
+        window.addEventListener("scroll", onReflow, true); // capture scroll in containers too
+
+        return () => {
+            window.removeEventListener("resize", onReflow);
+            window.removeEventListener("scroll", onReflow, true);
         };
-        document.addEventListener("mousedown", onDocClick);
-        return () => document.removeEventListener("mousedown", onDocClick);
+    }, [open]);
+
+    // Close on outside click (works even with portal)
+    useEffect(() => {
+        if (!open) return;
+
+        const onPointerDown = (e: PointerEvent) => {
+            const t = e.target as Node;
+            const btn = triggerRef.current;
+            const panel = panelRef.current;
+
+            if (btn && btn.contains(t)) return;
+            if (panel && panel.contains(t)) return;
+
+            setOpen(false);
+        };
+
+        document.addEventListener("pointerdown", onPointerDown);
+        return () => document.removeEventListener("pointerdown", onPointerDown);
     }, [open]);
 
     // Close on ESC
     useEffect(() => {
+        if (!open) return;
+
         const onKey = (e: KeyboardEvent) => {
-            if (!open) return;
             if (e.key === "Escape") setOpen(false);
         };
         window.addEventListener("keydown", onKey);
         return () => window.removeEventListener("keydown", onKey);
     }, [open]);
 
+    const dropdown =
+        open && pos
+            ? createPortal(
+                  <div
+                      ref={panelRef}
+                      style={{
+                          position: "fixed",
+                          top: pos.top,
+                          left: pos.left,
+                          width: pos.width,
+                          zIndex: 100000, // above modal
+                      }}
+                      className='
+              rounded-2xl overflow-hidden
+              bg-white dark:bg-[#0B1120]
+              border border-black/10 dark:border-white/10
+              shadow-[0_25px_60px_-20px_rgba(0,0,0,0.45)]
+            '
+                      role='listbox'
+                  >
+                      <div className='p-2'>
+                          {ROLE_OPTIONS.map((opt) => {
+                              const Icon = opt.icon;
+                              const active = opt.value === value;
+
+                              return (
+                                  <button
+                                      key={String(opt.value)}
+                                      type='button'
+                                      onClick={() => {
+                                          onChange(opt.value);
+                                          setOpen(false);
+                                      }}
+                                      className={`
+                      w-full flex items-center gap-3
+                      px-3 py-3 rounded-xl
+                      transition-all duration-200 text-left
+                      ${
+                          active
+                              ? "bg-amber-600/10 border border-amber-600/20"
+                              : "hover:bg-black/5 dark:hover:bg-white/5 border border-transparent"
+                      }
+                    `}
+                                  >
+                                      <span
+                                          className={`
+                        inline-flex items-center justify-center w-10 h-10 rounded-xl
+                        border
+                        ${
+                            active
+                                ? "bg-amber-600/15 border-amber-600/25"
+                                : "bg-black/5 dark:bg-white/5 border-black/10 dark:border-white/10"
+                        }
+                      `}
+                                      >
+                                          <Icon
+                                              size={18}
+                                              className={
+                                                  active
+                                                      ? "text-amber-600"
+                                                      : "text-slate-500"
+                                              }
+                                          />
+                                      </span>
+
+                                      <div className='flex-1'>
+                                          <div className='font-extrabold uppercase italic tracking-tight dark:text-white text-gray-800'>
+                                              {opt.label}
+                                          </div>
+                                          <div className='text-[10px] uppercase tracking-[0.22em] font-black text-slate-500 dark:text-slate-400'>
+                                              {String(opt.value)}
+                                          </div>
+                                      </div>
+
+                                      {active ? (
+                                          <span className='text-[9px] font-black uppercase tracking-[0.22em] text-amber-600'>
+                                              Selected
+                                          </span>
+                                      ) : null}
+                                  </button>
+                              );
+                          })}
+                      </div>
+                  </div>,
+                  document.body,
+              )
+            : null;
+
     return (
-        <div className='relative' ref={wrapRef}>
+        <div className='relative'>
             {/* Trigger */}
             <button
+                ref={triggerRef}
                 type='button'
                 disabled={disabled}
-                onClick={() => setOpen((v) => !v)}
+                onClick={toggleOpen}
                 className={`
           w-full h-14 rounded-2xl px-4 pl-12 pr-12
           flex items-center justify-between
@@ -94,7 +229,6 @@ export default function CustomRoleSelect({
                 aria-haspopup='listbox'
                 aria-expanded={open}
             >
-                {/* Left: icon + label */}
                 <div className='flex items-center gap-3'>
                     <span className='inline-flex items-center justify-center w-8 h-8 rounded-xl bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10'>
                         <CurrentIcon size={16} className='text-amber-600/80' />
@@ -110,7 +244,6 @@ export default function CustomRoleSelect({
                     </div>
                 </div>
 
-                {/* Chevron */}
                 <ChevronDown
                     size={18}
                     className={`text-slate-500 transition-transform duration-300 ${
@@ -119,7 +252,7 @@ export default function CustomRoleSelect({
                 />
             </button>
 
-            {/* Left shield icon like your inputs */}
+            {/* Shield icon */}
             <Shield
                 className='absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none'
                 size={18}
@@ -132,83 +265,8 @@ export default function CustomRoleSelect({
                 </span>
             ) : null}
 
-            {/* Dropdown */}
-            {open && !disabled ? (
-                <div
-                    className='
-            absolute left-0 right-0 mt-3 z-99999
-            rounded-2xl overflow-hidden
-            bg-white dark:bg-[#0B1120]
-            border border-black/10 dark:border-white/10
-            shadow-[0_25px_60px_-20px_rgba(0,0,0,0.45)]
-          '
-                    role='listbox'
-                >
-                    <div className='p-2'>
-                        {ROLE_OPTIONS.map((opt) => {
-                            const Icon = opt.icon;
-                            const active = opt.value === value;
-
-                            return (
-                                <button
-                                    key={String(opt.value)}
-                                    type='button'
-                                    onClick={() => {
-                                        onChange(opt.value);
-                                        setOpen(false);
-                                    }}
-                                    className={`
-                    w-full flex items-center gap-3
-                    px-3 py-3 rounded-xl
-                    transition-all duration-200 text-left
-                    ${
-                        active
-                            ? "bg-amber-600/10 border border-amber-600/20"
-                            : "hover:bg-black/5 dark:hover:bg-white/5 border border-transparent"
-                    }
-                  `}
-                                >
-                                    <span
-                                        className={`
-                      inline-flex items-center justify-center w-10 h-10 rounded-xl
-                      border
-                      ${
-                          active
-                              ? "bg-amber-600/15 border-amber-600/25"
-                              : "bg-black/5 dark:bg-white/5 border-black/10 dark:border-white/10"
-                      }
-                    `}
-                                    >
-                                        <Icon
-                                            size={18}
-                                            className={
-                                                active
-                                                    ? "text-amber-600"
-                                                    : "text-slate-500"
-                                            }
-                                        />
-                                    </span>
-
-                                    <div className='flex-1'>
-                                        <div className='font-extrabold uppercase italic tracking-tight dark:text-white text-gray-800'>
-                                            {opt.label}
-                                        </div>
-                                        <div className='text-[10px] uppercase tracking-[0.22em] font-black text-slate-500 dark:text-slate-400'>
-                                            {String(opt.value)}
-                                        </div>
-                                    </div>
-
-                                    {active ? (
-                                        <span className='text-[9px] font-black uppercase tracking-[0.22em] text-amber-600'>
-                                            Selected
-                                        </span>
-                                    ) : null}
-                                </button>
-                            );
-                        })}
-                    </div>
-                </div>
-            ) : null}
+            {/* Portal dropdown */}
+            {dropdown}
         </div>
     );
 }

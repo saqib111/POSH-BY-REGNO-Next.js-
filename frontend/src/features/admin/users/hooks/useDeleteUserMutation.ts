@@ -3,23 +3,25 @@
 "use client";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import toast from "react-hot-toast";
 import { usersApi } from "../api";
 
-export const useDeleteUserMutation = ({
-    userId,
-    onClose,
-}: {
-    userId: number;
-    userName?: string;
-    onClose?: () => void;
-}) => {
+type Vars = { userId: number };
+
+export function useDeleteUserMutation(opts?: { onClose?: () => void }) {
     const qc = useQueryClient();
 
     return useMutation({
-        mutationFn: () => usersApi.remove(userId),
+        mutationFn: async ({ userId }: Vars) => usersApi.remove(userId),
         onSuccess: async () => {
+            toast.success("User deleted");
             await qc.invalidateQueries({ queryKey: ["adminUsers"] });
-            onClose?.();
+            opts?.onClose?.();
+        },
+        onError: (err: any) => {
+            toast.error(
+                err?.response?.data?.message || "Failed to delete user",
+            );
         },
     });
-};
+}

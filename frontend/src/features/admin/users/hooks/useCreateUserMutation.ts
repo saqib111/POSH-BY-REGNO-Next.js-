@@ -3,28 +3,25 @@
 "use client";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import toast from "react-hot-toast";
 import { usersApi } from "../api";
 import type { CreateUserPayload } from "../types";
-import { notify, toastFirstValidationError } from "@/src/lib/toast";
 
-export const useCreateUserMutation = ({
-    onClose,
-}: { onClose?: () => void } = {}) => {
+export function useCreateUserMutation(opts?: { onClose?: () => void }) {
     const qc = useQueryClient();
 
     return useMutation({
-        mutationFn: (payload: CreateUserPayload) => usersApi.create(payload),
+        mutationFn: async (payload: CreateUserPayload) =>
+            usersApi.create(payload),
         onSuccess: async () => {
+            toast.success("User created");
             await qc.invalidateQueries({ queryKey: ["adminUsers"] });
-            notify.success("User created successfully");
-            onClose?.();
+            opts?.onClose?.();
         },
-        onError: (err) => {
-            toastFirstValidationError(err);
-            notify.error(
-                (err as any)?.response?.data?.message ||
-                    "Failed to create user",
+        onError: (err: any) => {
+            toast.error(
+                err?.response?.data?.message || "Failed to create user",
             );
         },
     });
-};
+}

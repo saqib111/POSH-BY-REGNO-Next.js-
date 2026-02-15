@@ -1,13 +1,8 @@
 /** @format */
 
-export type UserRole =
-    | "superadmin"
-    | "admin"
-    | "manager"
-    | "employee"
-    | "customer"
-    | string;
 export type UserStatus = "active" | "suspended" | string;
+
+export type UserRole = "admin" | "manager" | "employee" | string;
 
 export type AdminUser = {
     id: number;

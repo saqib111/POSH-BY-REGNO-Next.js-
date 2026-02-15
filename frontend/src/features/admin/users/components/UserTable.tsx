@@ -3,11 +3,29 @@
 "use client";
 
 import React from "react";
+import type { AdminUser } from "../types";
 import { Fingerprint, Search } from "lucide-react";
 import UserRow from "./UserRow";
-import type { AdminUser } from "../types";
 
-const SkeletonRow = () => (
+type Props = {
+    users: AdminUser[];
+    loading: boolean;
+    page: number;
+    limit: number;
+    search: string;
+
+    onToggleStatus: (u: AdminUser) => void;
+    onDelete: (u: AdminUser) => void;
+    onEdit: (u: AdminUser) => void;
+    onPassword: (u: AdminUser) => void;
+
+    disableActions?: boolean;
+
+    // optional: if you want only ONE row to show status loading
+    statusLoadingId?: number | null;
+};
+
+const SkeletonRow: React.FC = () => (
     <tr className='animate-pulse'>
         <td className='pl-12 py-7'>
             <div className='h-4 w-8 bg-slate-200/70 dark:bg-slate-800 rounded' />
@@ -38,7 +56,7 @@ const SkeletonRow = () => (
     </tr>
 );
 
-const EmptyState = ({ search }: { search: string }) => {
+const EmptyState: React.FC<{ search: string }> = ({ search }) => {
     const hasSearch = !!(search && String(search).trim().length > 0);
 
     return (
@@ -77,79 +95,60 @@ export default function UserTable({
     page,
     limit,
     search,
-}: {
-    users: AdminUser[];
-    loading: boolean;
-    page: number;
-    limit: number;
-    search: string;
-}) {
+    onToggleStatus,
+    onDelete,
+    onEdit,
+    onPassword,
+    disableActions = false,
+    statusLoadingId = null,
+}: Props) {
     const isEmpty = !loading && (!users || users.length === 0);
 
     return (
-        <div
-            className='
-        relative
-        bg-white dark:bg-[#0B1120]
-        rounded-3xl
-        border border-slate-200 dark:border-slate-800/70
-        overflow-hidden
-        shadow-sm
-        transition-all duration-500
-        hover:shadow-xl hover:shadow-slate-200/60
-        dark:hover:shadow-black/30
-      '
-        >
-            <div className='h-1.5 bg-linear-to-r from-amber-600/50 via-amber-600/10 to-transparent dark:from-amber-600/40' />
-
+        <div className='relative rounded-4xl border border-slate-200 dark:border-slate-800 overflow-hidden bg-white/70 dark:bg-slate-900/20 shadow-sm'>
             <div className='overflow-x-auto'>
-                <table className='w-full text-left border-collapse'>
-                    <thead>
-                        <tr className='bg-slate-50/70 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-800'>
-                            <th className='pl-12 py-8 text-[10px] font-black uppercase tracking-[0.4em] text-slate-500 dark:text-slate-400 w-24'>
-                                Pos.
-                            </th>
-                            <th className='px-10 py-8 text-[10px] font-black uppercase tracking-[0.4em] text-slate-500 dark:text-slate-400'>
-                                Identity
-                            </th>
-                            <th className='px-10 py-8 text-[10px] font-black uppercase tracking-[0.4em] text-slate-500 dark:text-slate-400'>
-                                Contact
-                            </th>
-                            <th className='px-10 py-8 text-[10px] font-black uppercase tracking-[0.4em] text-slate-500 dark:text-slate-400'>
-                                Role
-                            </th>
-                            <th className='px-10 py-8 text-[10px] font-black uppercase tracking-[0.4em] text-slate-500 dark:text-slate-400'>
-                                Status
-                            </th>
-                            <th className='px-10 py-8 text-[10px] font-black uppercase tracking-[0.4em] text-slate-500 dark:text-slate-400 text-right'>
-                                Actions
-                            </th>
+                <table className='w-full text-left'>
+                    <thead className='bg-white/60 dark:bg-slate-900/40 border-b border-slate-200/60 dark:border-slate-800/60'>
+                        <tr className='text-[10px] uppercase tracking-[0.25em] font-black text-slate-500 dark:text-slate-400'>
+                            <th className='pl-12 py-5'>#</th>
+                            <th className='px-10 py-5'>Identity</th>
+                            <th className='px-10 py-5'>Email</th>
+                            <th className='px-10 py-5'>Role</th>
+                            <th className='px-10 py-5'>Status</th>
+                            <th className='px-10 py-5 text-right'>Actions</th>
                         </tr>
                     </thead>
 
                     <tbody className='divide-y divide-slate-200/60 dark:divide-slate-800/50'>
                         {loading
-                            ? [...Array(6)].map((_, i) => (
+                            ? Array.from({ length: 6 }).map((_, i) => (
                                   <SkeletonRow key={i} />
                               ))
-                            : users.map((user, index) => (
+                            : users.map((u, idx) => (
                                   <UserRow
-                                      key={user.id}
-                                      user={user}
-                                      index={index}
+                                      key={u.id}
+                                      user={u}
+                                      index={idx}
                                       page={page}
                                       limit={limit}
+                                      onToggleStatus={onToggleStatus}
+                                      onDelete={onDelete}
+                                      onEdit={onEdit}
+                                      onPassword={onPassword}
+                                      disableActions={disableActions}
+                                      statusLoading={statusLoadingId === u.id}
                                   />
                               ))}
                     </tbody>
                 </table>
-
-                {isEmpty && <EmptyState search={search} />}
             </div>
 
-            {loading && (
+            {/* ✅ Empty state OUTSIDE table area */}
+            {isEmpty ? <EmptyState search={search} /> : null}
+
+            {loading ? (
                 <div className='pointer-events-none absolute inset-0 bg-white/30 dark:bg-black/10 backdrop-blur-[1px]' />
-            )}
+            ) : null}
         </div>
     );
 }

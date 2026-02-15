@@ -31,7 +31,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // Admin Routes
     Route::get('/admin/users', [AdminController::class, 'index']);
     Route::post('/admin/create-user', [AdminController::class, 'createUser']);
-    Route::patch('/admin/users/{user}', [AdminController::class, 'update']);
+    Route::put('/admin/users/{user}', [AdminController::class, 'update']);
     Route::patch('/admin/users/{user}/password', [AdminController::class, 'updatePassword']);
     Route::patch('/admin/users/{user}/status', [AdminController::class, 'changeStatus']);
     Route::delete('/admin/users/{id}', [AdminController::class, 'destroy']);

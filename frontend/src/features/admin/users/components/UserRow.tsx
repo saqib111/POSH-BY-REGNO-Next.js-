@@ -14,7 +14,6 @@ type Props = {
     page: number;
     limit: number;
 
-    // pass handlers from parent
     onEdit: (user: AdminUser) => void;
     onDelete: (user: AdminUser) => void;
     onPassword: (user: AdminUser) => void;
@@ -40,9 +39,7 @@ export default function UserRow({
 
     const avatarSrc =
         user.profilePic ||
-        `https://ui-avatars.com/api/?name=${encodeURIComponent(
-            user.name || "User",
-        )}&background=random`;
+        `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || "User")}&background=random`;
 
     return (
         <tr className='group relative transition-all duration-300 hover:bg-amber-50/40 dark:hover:bg-amber-600/5'>
@@ -55,7 +52,6 @@ export default function UserRow({
                 </span>
             </td>
 
-            {/* Identity */}
             <td className='px-10 py-7'>
                 <div className='flex items-center gap-5'>
                     <div className='w-14 h-14 rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-700 shadow-sm bg-slate-50 dark:bg-slate-900/40'>
@@ -79,7 +75,6 @@ export default function UserRow({
                 </div>
             </td>
 
-            {/* Contact */}
             <td className='px-10 py-7'>
                 <div className='flex items-center gap-3 text-slate-500 dark:text-slate-400'>
                     <Mail size={14} className='text-amber-600/70' />
@@ -87,12 +82,10 @@ export default function UserRow({
                 </div>
             </td>
 
-            {/* Role */}
             <td className='px-10 py-7 text-xs font-bold italic'>
                 <RoleBadge role={user.role} />
             </td>
 
-            {/* Status */}
             <td className='px-10 py-7'>
                 <StatusBadge
                     status={user.status}
@@ -101,7 +94,6 @@ export default function UserRow({
                 />
             </td>
 
-            {/* Actions */}
             <td className='px-10 py-7 text-right'>
                 <UserActions
                     onEditClick={() => onEdit(user)}

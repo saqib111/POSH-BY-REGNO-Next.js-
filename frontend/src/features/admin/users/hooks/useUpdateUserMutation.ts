@@ -3,24 +3,27 @@
 "use client";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import toast from "react-hot-toast";
 import { usersApi } from "../api";
 import type { UpdateUserPayload } from "../types";
 
-export const useUpdateUserMutation = ({
-    userId,
-    onClose,
-}: {
-    userId: number;
-    onClose?: () => void;
-}) => {
+type Vars = { userId: number; payload: UpdateUserPayload };
+
+export function useUpdateUserMutation(opts?: { onClose?: () => void }) {
     const qc = useQueryClient();
 
     return useMutation({
-        mutationFn: (payload: UpdateUserPayload) =>
+        mutationFn: async ({ userId, payload }: Vars) =>
             usersApi.update(userId, payload),
         onSuccess: async () => {
+            toast.success("User updated");
             await qc.invalidateQueries({ queryKey: ["adminUsers"] });
-            onClose?.();
+            opts?.onClose?.();
+        },
+        onError: (err: any) => {
+            toast.error(
+                err?.response?.data?.message || "Failed to update user",
+            );
         },
     });
-};
+}
