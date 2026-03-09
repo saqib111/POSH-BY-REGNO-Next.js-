@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Admin\AdminController;
+use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Auth\GoogleAuthController;
 
 Route::post('/register', [AuthController::class, 'register']);
@@ -35,4 +36,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::patch('/admin/users/{user}/password', [AdminController::class, 'updatePassword']);
     Route::patch('/admin/users/{user}/status', [AdminController::class, 'changeStatus']);
     Route::delete('/admin/users/{id}', [AdminController::class, 'destroy']);
+
+    // Category Routes
+    Route::get('/admin/categories', [CategoryController::class, 'index']);      // read (paginated + search)
+    Route::post('/admin/categories', [CategoryController::class, 'store']);     // create
+    Route::put('/admin/categories/{category}', [CategoryController::class, 'update']); // update
+    Route::delete('/admin/categories/{category}', [CategoryController::class, 'destroy']); // delete
 });
+

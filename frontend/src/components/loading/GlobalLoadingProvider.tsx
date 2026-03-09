@@ -36,7 +36,7 @@ export function GlobalLoadingProvider({
 
             {/* Full-screen overlay */}
             {isOpen && (
-                <div className='fixed inset-0 z-[9999]'>
+                <div className='fixed inset-0 z-9999'>
                     <Preloader />
                 </div>
             )}
