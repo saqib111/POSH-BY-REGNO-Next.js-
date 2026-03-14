@@ -133,14 +133,14 @@ const ManageUserPage = () => {
                                 debouncedSetter(val);
                             }}
                             className='
-                w-full rounded-2xl py-4 pl-14 pr-6
-                text-[11px] font-bold uppercase tracking-[0.2em]
-                bg-white text-slate-900 border border-slate-200
-                placeholder:text-slate-400
-                focus:border-amber-600 focus:ring-4 focus:ring-amber-600/10 outline-none transition-all
-                shadow-sm
-                dark:bg-slate-900/50 dark:text-white dark:border-slate-800 dark:placeholder:text-slate-500
-              '
+                                        w-full rounded-2xl py-4 pl-14 pr-6
+                                        text-[11px] font-bold uppercase tracking-[0.2em]
+                                        bg-white text-slate-900 border border-slate-200
+                                        placeholder:text-slate-400
+                                        focus:border-amber-600 focus:ring-4 focus:ring-amber-600/10 outline-none transition-all
+                                        shadow-sm
+                                        dark:bg-slate-900/50 dark:text-white dark:border-slate-800 dark:placeholder:text-slate-500
+                                    '
                         />
                     </div>
 

@@ -3,8 +3,10 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Admin\AdminController;
-use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Auth\GoogleAuthController;
+use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Admin\SubCategoriesController;
+use App\Http\Controllers\Admin\ProductsController;
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
@@ -42,5 +44,20 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/admin/categories', [CategoryController::class, 'store']);     // create
     Route::put('/admin/categories/{category}', [CategoryController::class, 'update']); // update
     Route::delete('/admin/categories/{category}', [CategoryController::class, 'destroy']); // delete
+
+    // SUB CATEGORY ROUTES
+    Route::get('/admin/sub-categories/category-options', [SubCategoriesController::class, 'categoryOptions']);
+    Route::post('/admin/sub-categories/create', [SubCategoriesController::class, 'createSubCategory']);
+    Route::get('/admin/sub-categories', [SubCategoriesController::class, 'viewSubCategory']);
+    Route::put('/admin/sub-categories/{id}', [SubCategoriesController::class, 'updateSubCategory']);
+    Route::delete('/admin/sub-categories/{id}', [SubCategoriesController::class, 'deleteSubCategory']);
+
+    // PRODUCTS ROUTES
+    Route::get('/admin/products/category-options', [ProductsController::class, 'categoryOptions']);
+    Route::get('/admin/products/sub-category-options', [ProductsController::class, 'subCategoryOptions']);
+    Route::post('/admin/products/create', [ProductsController::class, 'createProduct']);
+    Route::get('/admin/products', [ProductsController::class, 'viewProducts']);
+    Route::put('/admin/products/{id}', [ProductsController::class, 'updateProduct']);
+    Route::delete('/admin/products/{id}', [ProductsController::class, 'deleteProduct']);
 });
 

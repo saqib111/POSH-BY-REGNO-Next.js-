@@ -14,13 +14,15 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { useCreateCategoryMutation } from "@/src/features/admin/category/hooks/useCreateCategoryMutation";
+import RowsPerPageDropdown from "@/src/features/admin/RowsPerPageDropdown";
 
 export default function CategoryPage() {
 
     const [createOpen, setCreateOpen] = useState(false);
     const [search, setSearch] = useState("");
     const [page, setPage] = useState(1);
-    const limit = 10;
+    const [limit, setLimit] = useState(10);
+    
 
     const { data, isLoading, isError } = useCategoriesQuery({
         search,
@@ -30,6 +32,11 @@ export default function CategoryPage() {
 
     const totalPages = data?.totalPages ?? 1;
     const totalCategories = data?.totalCategories ?? 0;
+
+    const handleLimitChange = (newLimit: number) => {
+        setLimit(newLimit);
+        setPage(1);
+    };
 
     // Create Category Mutation
     const createMutation = useCreateCategoryMutation();
@@ -54,6 +61,12 @@ export default function CategoryPage() {
                 </div>
 
                 <div className="flex flex-wrap items-center gap-4 w-full xl:w-auto">
+
+                    <RowsPerPageDropdown
+                        limit={limit}
+                        setLimit={handleLimitChange}
+                    />
+
                     <div className="relative flex-1 md:w-80 group">
                         <Search
                             className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-amber-600 transition-colors"
