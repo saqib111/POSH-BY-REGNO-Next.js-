@@ -5,6 +5,8 @@ import type {
     DeleteCategoryResponse,
     GetCategoriesParams,
     GetCategoriesResponse,
+    UpdateCategoryPayload,
+    UpdateCategoryResponse,
 } from "./types";
 
 export const getCategories = async (
@@ -37,6 +39,20 @@ export const deleteCategory = async (
 ): Promise<DeleteCategoryResponse> => {
     const response = await api.delete<DeleteCategoryResponse>(
         `/admin/categories/${categoryId}`,
+    );
+
+    return response.data;
+};
+
+// ******************** Update Category API *****************************
+
+export const updateCategory = async (
+    categoryId: number,
+    payload: UpdateCategoryPayload
+): Promise<UpdateCategoryResponse> => {
+    const response = await api.put<UpdateCategoryResponse>(
+        `admin/categories/${categoryId}`,
+        payload
     );
 
     return response.data;

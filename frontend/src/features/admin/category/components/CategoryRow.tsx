@@ -1,10 +1,12 @@
 "use client";
 
-import ConfirmDeleteCategoryModal from "../modals/ConfirmDeleteCategoryModal";
-import { useDeleteCategoryMutation } from "../hooks/useDeleteCategoryMutation";
-import type { Category } from "../types";
 import { useState } from "react";
-import { Trash2 } from "lucide-react";
+import { Pencil, Trash2 } from "lucide-react";
+import ConfirmDeleteCategoryModal from "../modals/ConfirmDeleteCategoryModal";
+import UpdateCategoryModal from "../modals/UpdateCategoryModal";
+import { useDeleteCategoryMutation } from "../hooks/useDeleteCategoryMutation";
+import { useUpdateCategoryMutation } from "../hooks/useUpdateCategoryMutation";
+import type { Category } from "../types";
 
 type CategoryRowProps = {
     category: Category;
@@ -17,13 +19,21 @@ const CategoryRow = ({ category, index, page, limit }: CategoryRowProps) => {
     const serialNumber = (page - 1) * limit + index + 1;
 
     const [deleteOpen, setDeleteOpen] = useState(false);
+    const [editOpen, setEditOpen] = useState(false);
+
+    const updateMutation = useUpdateCategoryMutation({
+        categoryId: category.id,
+        onClose: () => setEditOpen(false),
+    });
 
     const deleteMutation = useDeleteCategoryMutation({
         categoryId: category.id,
         categoryName: category.category_name,
     });
 
+    const isUpdating = updateMutation.isPending;
     const isDeleting = deleteMutation.isPending;
+    const disableActions = isUpdating || isDeleting;
 
     return (
         <>
@@ -103,32 +113,56 @@ const CategoryRow = ({ category, index, page, limit }: CategoryRowProps) => {
                     </div>
                 </td>
 
-                <td className="px-10 py-7 text-right">
-                    <button
-                        type="button"
-                        className="text-xs font-black uppercase tracking-[0.2em] text-amber-600 hover:text-amber-700 transition-colors"
-                    >
+                <td className="px-10 py-7">
+                    <div className="flex items-center justify-end gap-2">
+                        <button
+                            type="button"
+                            onClick={() => setEditOpen(true)}
+                            disabled={disableActions}
+                            className="
+                                inline-flex items-center justify-center
+                                p-2.5 rounded-xl
+                                transition-all duration-300
+                                border border-transparent
+                                shadow-sm hover:shadow-md
+                                active:scale-90
+                                disabled:opacity-50 disabled:cursor-not-allowed
+                                text-amber-600 bg-amber-50 dark:bg-amber-500/10
+                                hover:bg-amber-600 hover:text-white
+                            "
+                        >
+                            <Pencil size={16} strokeWidth={2.2} />
+                        </button>
+
                         <button
                             type="button"
                             onClick={() => setDeleteOpen(true)}
-                            disabled={isDeleting}
+                            disabled={disableActions}
                             className="
-                                        inline-flex items-center justify-center
-                                        p-2.5 rounded-xl
-                                        transition-all duration-300
-                                        border border-transparent
-                                        shadow-sm hover:shadow-md
-                                        active:scale-90
-                                        disabled:opacity-50 disabled:cursor-not-allowed
-                                        text-rose-600 bg-rose-50 dark:bg-rose-500/10
-                                        hover:bg-rose-600 hover:text-white
-                                    "
+                                inline-flex items-center justify-center
+                                p-2.5 rounded-xl
+                                transition-all duration-300
+                                border border-transparent
+                                shadow-sm hover:shadow-md
+                                active:scale-90
+                                disabled:opacity-50 disabled:cursor-not-allowed
+                                text-rose-600 bg-rose-50 dark:bg-rose-500/10
+                                hover:bg-rose-600 hover:text-white
+                            "
                         >
                             <Trash2 size={16} strokeWidth={2.2} />
                         </button>
-                    </button>
+                    </div>
                 </td>
             </tr>
+
+            <UpdateCategoryModal
+                open={editOpen}
+                category={category}
+                onClose={() => setEditOpen(false)}
+                onConfirm={(payload) => updateMutation.mutateAsync(payload)}
+                isLoading={isUpdating}
+            />
 
             <ConfirmDeleteCategoryModal
                 open={deleteOpen}

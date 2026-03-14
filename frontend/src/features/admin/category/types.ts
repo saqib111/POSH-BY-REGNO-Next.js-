@@ -1,8 +1,12 @@
+// *************************************************
+// Fetch Category Types
+// *************************************************
+
 export type Category = {
     id: number;
     category_name: string;
     created_at: string;
-}
+};
 
 export type GetCategoriesResponse = {
     status: string;
@@ -10,19 +14,18 @@ export type GetCategoriesResponse = {
     totalPages: number;
     totalCategories: number;
     currentPage: number;
-}
+};
 
 export type GetCategoriesParams = {
     search?: string;
     page?: number;
     limit?: number;
-}
+};
 // *************************************************
-// =================================================
-// *************************************************
-
-
 // Create Category Types
+// *************************************************
+
+
 export type CreateCategoryPayload = {
     category_name: string;
 };
@@ -36,15 +39,34 @@ export type CreateCategoryResponse = {
         status: "active" | "inactive";
         created_at: string;
         updated_at: string;
-    }    
-}
+    };    
+};
 
 // *************************************************
-// =================================================
-// *************************************************
-
 // Delete Category Types
+// *************************************************
+
 export type DeleteCategoryResponse = {
     status: string;
     message: string;
-}
+};
+
+// *************************************************
+// Update Category Types
+// *************************************************
+
+export type UpdateCategoryPayload = {
+    category_name: string;
+};
+
+export type UpdateCategoryResponse = {
+    status: string;
+    message: string;
+    category: {
+        id: number;
+        category_name: string;
+        status: "active" | "inactive";
+        created_at: string;
+        updated_at: string;
+    };
+};
