@@ -64,3 +64,35 @@ export type CreateSubCategoryResponse = {
         updated_at: string;
     };
 };
+
+// *************************************************
+// Delete Sub-Category Types
+// *************************************************
+
+export type DeleteSubCategoryResponse = {
+    status: string;
+    message: string;
+    "sub-category": string;
+};
+
+// *************************************************
+// Update Sub-Category Types
+// *************************************************
+
+export type UpdateSubCategoryPayload = {
+    category_id: number;
+    sub_category_name: string;
+};
+
+export type UpdateSubCategoryResponse = {
+    status: string;
+    message: string;
+    sub_category: {
+        id: number;
+        category_id: number;
+        sub_category_name: string;
+        status: "active" | "inactive";
+        created_at: string;
+        updated_at: string;
+    };
+};

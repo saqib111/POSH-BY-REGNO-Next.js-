@@ -14,11 +14,12 @@ import {
     Search,
 } from "lucide-react";
 import { useState } from "react";
+import RowsPerPageDropdown from "@/src/features/admin/RowsPerPageDropdown";
 
 export default function SubCategoryPage() {
     const [search, setSearch] = useState("");
     const [page, setPage] = useState(1);
-    const limit = 10;
+    const [limit, setLimit] = useState(10);
     const [createOpen, setCreateOpen] = useState(false);
 
     const { data, isLoading, isError, error } = useSubCategoriesQuery({
@@ -29,6 +30,11 @@ export default function SubCategoryPage() {
 
     const totalPages = data?.totalPages ?? 1;
     const totalSubCategories = data?.totalSubCategories ?? 0;
+
+    const handleLimitChange = (newLimit: number) => {
+        setLimit(newLimit);
+        setPage(1);
+    };
 
     const createMutation = useCreateSubCategoryMutation();
 
@@ -52,6 +58,12 @@ export default function SubCategoryPage() {
                 </div>
 
                 <div className="flex flex-wrap items-center gap-4 w-full xl:w-auto">
+                    
+                    <RowsPerPageDropdown
+                        limit={limit}
+                        setLimit={handleLimitChange}
+                    />
+
                     <div className="relative flex-1 md:w-80 group">
                         <Search
                             className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-amber-600 transition-colors"

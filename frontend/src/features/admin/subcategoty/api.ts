@@ -2,9 +2,12 @@ import api from "@/src/lib/axios/client";
 import {
     CreateSubCategoryPayload,
     CreateSubCategoryResponse,
+    DeleteSubCategoryResponse,
     GetCategoryOptionsResponse,
     GetSubCategoriesParam,
-    GetSubCategoriesResponse
+    GetSubCategoriesResponse,
+    UpdateSubCategoryPayload,
+    UpdateSubCategoryResponse,
 } from "./types";
 import { GetCategoriesParams } from "../category/types";
 
@@ -41,5 +44,31 @@ export const createSubCategory = async (
         "/admin/sub-categories/create",
         payload
     );
+    return response.data;
+};
+
+// ******************** Delete Sub-Category API *****************************
+
+export const deleteSubCategory = async (
+    subCategoryId: number
+): Promise<DeleteSubCategoryResponse> => {
+    const response = await api.delete<DeleteSubCategoryResponse>(
+        `/admin/sub-categories/${subCategoryId}`
+    );
+
+    return response.data;
+};
+
+// ******************** Update Sub-Category API *****************************
+
+export const updateSubCategory = async (
+    subCategoryId: number,
+    payload: UpdateSubCategoryPayload
+): Promise<UpdateSubCategoryResponse> => {
+    const response = await api.put<UpdateSubCategoryResponse>(
+        `/admin/sub-categories/${subCategoryId}`,
+        payload
+    );
+
     return response.data;
 };
