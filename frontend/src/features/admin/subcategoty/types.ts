@@ -23,3 +23,44 @@ export type GetSubCategoriesParam = {
     page?: number;
     limit?: number;
 };
+
+// *************************************************
+// Create Sub-Category Types
+// *************************************************
+
+export type CategoryOption = {
+    value: number;
+    label: string;
+};
+
+export type GetCategoryOptionsParams = {
+    search?: string;
+    page?: number;
+    limit?: number;
+};
+
+export type GetCategoryOptionsResponse = {
+    status: string;
+    options: CategoryOption[];
+    currentPage: number;
+    totalPages: number;
+    hasMore: boolean;
+};
+
+export type CreateSubCategoryPayload = {
+    category_id: number;
+    sub_category_name: string;
+};
+
+export type CreateSubCategoryResponse = {
+    status: string;
+    message: string;
+    sub_category: {
+        id: number;
+        category_id: number;
+        sub_category_name: string;
+        status: "active" | "inactive";
+        created_at: string;
+        updated_at: string;
+    };
+};

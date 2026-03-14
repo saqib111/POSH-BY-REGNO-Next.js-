@@ -2,6 +2,8 @@
 
 import SubCategoryTable from "@/src/features/admin/subcategoty/components/SubcategoryTable";
 import { useSubCategoriesQuery } from "@/src/features/admin/subcategoty/hooks/useSubCategoriesQuery";
+import CreateSubCategoryModal from "@/src/features/admin/subcategoty/modals/CreateSubCategoryModal";
+import { useCreateSubCategoryMutation } from "@/src/features/admin/subcategoty/hooks/useCreateSubCategoryMutation";
 import {
     ChevronLeft,
     ChevronRight,
@@ -17,6 +19,7 @@ export default function SubCategoryPage() {
     const [search, setSearch] = useState("");
     const [page, setPage] = useState(1);
     const limit = 10;
+    const [createOpen, setCreateOpen] = useState(false);
 
     const { data, isLoading, isError, error } = useSubCategoriesQuery({
         search,
@@ -26,6 +29,8 @@ export default function SubCategoryPage() {
 
     const totalPages = data?.totalPages ?? 1;
     const totalSubCategories = data?.totalSubCategories ?? 0;
+
+    const createMutation = useCreateSubCategoryMutation();
 
     return (
         <div className="space-y-10">
@@ -75,6 +80,7 @@ export default function SubCategoryPage() {
                     <div className="group pt-1">
                         <button
                             type="button"
+                            onClick={() => setCreateOpen(true)}
                             className="
                                 flex items-center gap-3
                                 bg-slate-900 text-white
@@ -155,6 +161,13 @@ export default function SubCategoryPage() {
                     />
                 </div>
             </div>
+
+            <CreateSubCategoryModal
+                open={createOpen}
+                onClose={() => setCreateOpen(false)}
+                onConfirm={(values) => createMutation.mutateAsync(values)}
+                isLoading={createMutation.isPending}
+            />
         </div>
     );
 }
