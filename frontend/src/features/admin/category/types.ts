@@ -42,3 +42,9 @@ export type CreateCategoryResponse = {
 // *************************************************
 // =================================================
 // *************************************************
+
+// Delete Category Types
+export type DeleteCategoryResponse = {
+    status: string;
+    message: string;
+}
