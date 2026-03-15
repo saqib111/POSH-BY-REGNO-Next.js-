@@ -2,6 +2,7 @@ import api from "@/src/lib/axios/client"
 import { 
     CreateProductPayload, 
     CreateProductResponse, 
+    DeleteProductResponse, 
     GetProductCategoryOptionsParams, 
     GetProductCategoryOptionsResponse, 
     GetProductSubCategoryOptionsParams, 
@@ -55,6 +56,18 @@ export const createProduct = async (
     const response = await api.post<CreateProductResponse>(
         "/admin/products/create",
         payload
+    );
+
+    return response.data;
+};
+
+// ******************** Delete Products API *****************************
+
+export const deleteProduct = async (
+    productId: number
+): Promise<DeleteProductResponse> => {
+    const response = await api.delete<DeleteProductResponse>(
+        `/admin/products/${productId}`
     );
 
     return response.data;

@@ -86,3 +86,13 @@ export type CreateProductResponse = {
         updated_at: string;
     };
 };
+
+// *************************************************
+// Delete Product Types
+// *************************************************
+
+export type DeleteProductResponse = {
+    status: string;
+    message: string;
+    product: string;
+};
