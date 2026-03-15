@@ -105,40 +105,51 @@ export default function UserTable({
     const isEmpty = !loading && (!users || users.length === 0);
 
     return (
-        <div className='relative rounded-4xl border border-slate-200 dark:border-slate-800 overflow-hidden bg-white/70 dark:bg-slate-900/20 shadow-sm'>
+        <div className='relative bg-white dark:bg-[#0B1120] rounded-3xl border border-slate-200 dark:border-slate-800/70 overflow-hidden shadow-smtransition-all duration-500 hover:shadow-xl hover:shadow-slate-200/60 dark:hover:shadow-black/30'>
+            <div className="h-1.5 bg-linear-to-r from-amber-600/50 via-amber-600/10 to-transparent dark:from-amber-600/40" />
             <div className='overflow-x-auto'>
-                <table className='w-full text-left'>
-                    <thead className='bg-white/60 dark:bg-slate-900/40 border-b border-slate-200/60 dark:border-slate-800/60'>
-                        <tr className='text-[10px] uppercase tracking-[0.25em] font-black text-slate-500 dark:text-slate-400'>
-                            <th className='pl-12 py-5'>#</th>
-                            <th className='px-10 py-5'>Identity</th>
-                            <th className='px-10 py-5'>Email</th>
-                            <th className='px-10 py-5'>Role</th>
-                            <th className='px-10 py-5'>Status</th>
-                            <th className='px-10 py-5 text-right'>Actions</th>
+                <table className='w-full text-left border-collapse'>
+                    <thead>
+                        <tr className='bg-slate-50/70 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-800'>
+                            <th className='pl-12 py-8 text-[10px] font-black uppercase tracking-[0.4em] text-slate-500 dark:text-slate-400 w-24'>#</th>
+                            <th className="px-10 py-8 text-[10px] font-black uppercase tracking-[0.4em] text-slate-500 dark:text-slate-400">
+                                Identity
+                            </th>
+                            <th className="px-10 py-8 text-[10px] font-black uppercase tracking-[0.4em] text-slate-500 dark:text-slate-400">
+                                Contact
+                            </th>
+                            <th className="px-10 py-8 text-[10px] font-black uppercase tracking-[0.4em] text-slate-500 dark:text-slate-400">
+                                Role
+                            </th>
+                            <th className="px-10 py-8 text-[10px] font-black uppercase tracking-[0.4em] text-slate-500 dark:text-slate-400">
+                                Status
+                            </th>
+                            <th className="px-10 py-8 text-[10px] font-black uppercase tracking-[0.4em] text-slate-500 dark:text-slate-400 text-right">
+                                Actions
+                            </th>
                         </tr>
                     </thead>
 
                     <tbody className='divide-y divide-slate-200/60 dark:divide-slate-800/50'>
                         {loading
                             ? Array.from({ length: 6 }).map((_, i) => (
-                                  <SkeletonRow key={i} />
-                              ))
+                                <SkeletonRow key={i} />
+                            ))
                             : users.map((u, idx) => (
-                                  <UserRow
-                                      key={u.id}
-                                      user={u}
-                                      index={idx}
-                                      page={page}
-                                      limit={limit}
-                                      onToggleStatus={onToggleStatus}
-                                      onDelete={onDelete}
-                                      onEdit={onEdit}
-                                      onPassword={onPassword}
-                                      disableActions={disableActions}
-                                      statusLoading={statusLoadingId === u.id}
-                                  />
-                              ))}
+                                <UserRow
+                                    key={u.id}
+                                    user={u}
+                                    index={idx}
+                                    page={page}
+                                    limit={limit}
+                                    onToggleStatus={onToggleStatus}
+                                    onDelete={onDelete}
+                                    onEdit={onEdit}
+                                    onPassword={onPassword}
+                                    disableActions={disableActions}
+                                    statusLoading={statusLoadingId === u.id}
+                                />
+                            ))}
                     </tbody>
                 </table>
             </div>

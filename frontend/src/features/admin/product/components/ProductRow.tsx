@@ -1,9 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { Trash2 } from "lucide-react";
+import { Pencil, Trash2 } from "lucide-react";
 import ConfirmDeleteProductModal from "../modals/ConfirmDeleteProductModal";
+import UpdateProductModal from "../modals/UpdateProductModal";
 import { useDeleteProductMutation } from "../hooks/useDeleteProductMutation";
+import { useUpdateProductMutation } from "../hooks/useUpdateProductMutation";
 import type { Product } from "../types";
 
 type ProductRowProps = {
@@ -17,6 +19,12 @@ const ProductRow = ({ product, index, page, limit }: ProductRowProps) => {
     const serialNumber = (page - 1) * limit + index + 1;
 
     const [deleteOpen, setDeleteOpen] = useState(false);
+    const [editOpen, setEditOpen] = useState(false);
+
+    const updateMutation = useUpdateProductMutation({
+        productId: product.id,
+        onClose: () => setEditOpen(false),
+    });
 
     const deleteMutation = useDeleteProductMutation({
         productId: product.id,
@@ -24,16 +32,18 @@ const ProductRow = ({ product, index, page, limit }: ProductRowProps) => {
         onClose: () => setDeleteOpen(false),
     });
 
+    const isUpdating = updateMutation.isPending;
     const isDeleting = deleteMutation.isPending;
+    const disableActions = isUpdating || isDeleting;
 
     return (
         <>
             <tr
                 className="
-                group relative
-                transition-all duration-300
-                hover:bg-emerald-50/40 dark:hover:bg-emerald-600/5
-            "
+                    group relative
+                    transition-all duration-300
+                    hover:bg-emerald-50/40 dark:hover:bg-emerald-600/5
+                "
             >
                 <td className="pl-12 py-7">
                     <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-emerald-600 transform scale-y-0 group-hover:scale-y-100 transition-transform duration-500 origin-center" />
@@ -72,10 +82,10 @@ const ProductRow = ({ product, index, page, limit }: ProductRowProps) => {
                     <div className="flex items-center gap-3">
                         <div
                             className="
-                            hidden sm:flex h-8 w-8 items-center justify-center rounded-lg
-                            bg-slate-50 border border-slate-200
-                            dark:bg-slate-800/50 dark:border-slate-700/40
-                        "
+                                hidden sm:flex h-8 w-8 items-center justify-center rounded-lg
+                                bg-slate-50 border border-slate-200
+                                dark:bg-slate-800/50 dark:border-slate-700/40
+                            "
                         >
                             <svg
                                 className="h-4 w-4 text-slate-400"
@@ -125,32 +135,62 @@ const ProductRow = ({ product, index, page, limit }: ProductRowProps) => {
                 </td>
 
                 <td className="px-10 py-7 text-right">
-                    <button
-                        type="button"
-                        onClick={() => setDeleteOpen(true)}
-                        disabled={isDeleting}
-                        className="
-                            inline-flex items-center justify-center
-                            p-2.5 rounded-xl
-                            transition-all duration-300
-                            border border-transparent
-                            shadow-sm hover:shadow-md
-                            active:scale-90
-                            disabled:opacity-50 disabled:cursor-not-allowed
-                            text-rose-600 bg-rose-50 dark:bg-rose-500/10
-                            hover:bg-rose-600 hover:text-white
-                        "
-                    >
-                        <Trash2 size={16} strokeWidth={2.2} />
-                    </button>
+                    <div className="flex items-center justify-end gap-2">
+                        <button
+                            type="button"
+                            onClick={() => setEditOpen(true)}
+                            disabled={disableActions}
+                            className="
+                                inline-flex items-center justify-center
+                                p-2.5 rounded-xl
+                                transition-all duration-300
+                                border border-transparent
+                                shadow-sm hover:shadow-md
+                                active:scale-90
+                                disabled:opacity-50 disabled:cursor-not-allowed
+                                text-emerald-600 bg-emerald-50 dark:bg-emerald-500/10
+                                hover:bg-emerald-600 hover:text-white
+                            "
+                        >
+                            <Pencil size={16} strokeWidth={2.2} />
+                        </button>
+
+                        <button
+                            type="button"
+                            onClick={() => setDeleteOpen(true)}
+                            disabled={disableActions}
+                            className="
+                                inline-flex items-center justify-center
+                                p-2.5 rounded-xl
+                                transition-all duration-300
+                                border border-transparent
+                                shadow-sm hover:shadow-md
+                                active:scale-90
+                                disabled:opacity-50 disabled:cursor-not-allowed
+                                text-rose-600 bg-rose-50 dark:bg-rose-500/10
+                                hover:bg-rose-600 hover:text-white
+                            "
+                        >
+                            <Trash2 size={16} strokeWidth={2.2} />
+                        </button>
+                    </div>
                 </td>
             </tr>
+
             <ConfirmDeleteProductModal
                 open={deleteOpen}
                 productName={product.product_name}
                 onClose={() => setDeleteOpen(false)}
                 onConfirm={() => deleteMutation.mutate()}
                 isLoading={isDeleting}
+            />
+
+            <UpdateProductModal
+                open={editOpen}
+                product={product}
+                onClose={() => setEditOpen(false)}
+                onConfirm={(payload) => updateMutation.mutateAsync(payload)}
+                isLoading={isUpdating}
             />
         </>
     );

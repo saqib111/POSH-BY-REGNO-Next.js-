@@ -8,7 +8,9 @@ import {
     GetProductSubCategoryOptionsParams, 
     GetProductSubCategoryOptionsResponse, 
     GetProductsParams, 
-    GetProductsResponse, 
+    GetProductsResponse,
+    UpdateProductPayload,
+    UpdateProductResponse, 
 } from "./types";
 
 // ******************** Fetch Products API *****************************
@@ -68,6 +70,20 @@ export const deleteProduct = async (
 ): Promise<DeleteProductResponse> => {
     const response = await api.delete<DeleteProductResponse>(
         `/admin/products/${productId}`
+    );
+
+    return response.data;
+};
+
+// ******************** Update Products API *****************************
+
+export const updateProduct = async (
+    productId: number,
+    payload: UpdateProductPayload
+): Promise<UpdateProductResponse> => {
+    const response = await api.put<UpdateProductResponse>(
+        `/admin/products/${productId}`,
+        payload
     );
 
     return response.data;

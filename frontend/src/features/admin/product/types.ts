@@ -96,3 +96,29 @@ export type DeleteProductResponse = {
     message: string;
     product: string;
 };
+
+// *************************************************
+// Update Product Types
+// *************************************************
+
+export type UpdateProductPayload = {
+    category_id: number;
+    sub_category_id: number;
+    product_name: string;
+    sku: string | null;
+};
+
+export type UpdateProductResponse = {
+    status: string;
+    message: string;
+    product: {
+        id: number;
+        category_id: number;
+        sub_category_id: number;
+        product_name: string;
+        sku: string | null;
+        status: number;
+        created_at: string;
+        updated_at: string;
+    };
+};

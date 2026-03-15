@@ -15,12 +15,13 @@ import {
 import { useState } from "react";
 import CreateProductModal from "@/src/features/admin/product/modals/CreateProductModal";
 import { useCreateProductMutation } from "@/src/features/admin/product/hooks/useCreateProductMutation";
+import RowsPerPageDropdown from "@/src/features/admin/RowsPerPageDropdown";
 
 export default function ProductPage() {
     // --- UI STATE ---
     const [search, setSearch] = useState("");
     const [page, setPage] = useState(1);
-    const limit = 10;
+    const [limit, setLimit] = useState(10);
     const [createOpen, setCreateOpen] = useState(false);
     const { data, isLoading, isError, error } = useProductsQuery({
         search,
@@ -32,6 +33,11 @@ export default function ProductPage() {
 
     const totalPages = data?.totalPages ?? 1;
     const totalProducts = data?.totalProducts ?? 0;
+
+    const handleLimitChange = (newLimit: number) => {
+        setLimit(newLimit);
+        setPage(1);
+    };
 
     return (
         <div className="space-y-10">
@@ -51,6 +57,12 @@ export default function ProductPage() {
                 </div>
 
                 <div className="flex flex-wrap items-center gap-4 w-full xl:w-auto">
+
+                    <RowsPerPageDropdown
+                        limit={limit}
+                        setLimit={handleLimitChange}
+                    />
+
                     <div className="relative flex-1 md:w-80 group">
                         <Search
                             className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-emerald-600 transition-colors"
