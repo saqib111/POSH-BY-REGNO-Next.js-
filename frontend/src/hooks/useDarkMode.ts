@@ -4,11 +4,14 @@
 import { useTheme } from "@/src/providers/ThemeProvider";
 
 export function useDarkMode() {
-    const { darkMode, setTheme, toggleTheme, hydrated } = useTheme();
+    const { darkMode, setTheme } = useTheme();
+
+    const toggleTheme = () => {
+        setTheme(darkMode ? "light" : "dark");
+    };
 
     return {
         darkMode,
-        hydrated,
         toggle: toggleTheme,
         setDarkMode: (v: boolean) => setTheme(v ? "dark" : "light"),
     };
