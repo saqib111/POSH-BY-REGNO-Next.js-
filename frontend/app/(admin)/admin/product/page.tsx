@@ -3,20 +3,32 @@
 
 import ProductTable from "@/src/features/admin/product/components/ProductTable";
 import { useProductsQuery } from "@/src/features/admin/product/hooks/useProductsQuery";
-import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Package, Plus, Search } from "lucide-react";
+import {
+    ChevronLeft,
+    ChevronRight,
+    ChevronsLeft,
+    ChevronsRight,
+    Package,
+    Plus,
+    Search,
+} from "lucide-react";
 import { useState } from "react";
+import CreateProductModal from "@/src/features/admin/product/modals/CreateProductModal";
+import { useCreateProductMutation } from "@/src/features/admin/product/hooks/useCreateProductMutation";
 
 export default function ProductPage() {
     // --- UI STATE ---
     const [search, setSearch] = useState("");
     const [page, setPage] = useState(1);
     const limit = 10;
-
+    const [createOpen, setCreateOpen] = useState(false);
     const { data, isLoading, isError, error } = useProductsQuery({
         search,
         page,
         limit,
     });
+
+    const createMutation = useCreateProductMutation();
 
     const totalPages = data?.totalPages ?? 1;
     const totalProducts = data?.totalProducts ?? 0;
@@ -39,7 +51,6 @@ export default function ProductPage() {
                 </div>
 
                 <div className="flex flex-wrap items-center gap-4 w-full xl:w-auto">
-
                     <div className="relative flex-1 md:w-80 group">
                         <Search
                             className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-emerald-600 transition-colors"
@@ -68,6 +79,7 @@ export default function ProductPage() {
                     <div className="group pt-1">
                         <button
                             type="button"
+                            onClick={() => setCreateOpen(true)}
                             className="
                                 flex items-center gap-3
                                 bg-slate-900 text-white
@@ -137,9 +149,7 @@ export default function ProductPage() {
                     </div>
 
                     <NavButton
-                        onClick={() =>
-                            setPage((prev) => Math.min(totalPages, prev + 1))
-                        }
+                        onClick={() => setPage((prev) => Math.min(totalPages, prev + 1))}
                         disabled={page === totalPages || isLoading}
                         icon={<ChevronRight size={18} />}
                     />
@@ -153,9 +163,14 @@ export default function ProductPage() {
             </div>
 
             {/* Create Modal */}
-
+            <CreateProductModal
+                open={createOpen}
+                onClose={() => setCreateOpen(false)}
+                onConfirm={(values) => createMutation.mutateAsync(values)}
+                isLoading={createMutation.isPending}
+            />
         </div>
-    )
+    );
 }
 
 const NavButton = ({
