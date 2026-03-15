@@ -251,25 +251,26 @@ export default function AdminSidebar({ isOpen, setIsOpen }: Props) {
                                 <div className='shimmer-layer' />
 
                                 <div className='flex items-center gap-4'>
-                                    {/* Icon */}
-                                    <div className='relative flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-slate-50 ring-1 ring-slate-200 dark:bg-slate-800 dark:ring-slate-700'>
+                                    {/* Icon Section with Dot-Grid Pattern */}
+                                    <div className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-slate-50 ring-1 ring-slate-200 dark:bg-slate-800 dark:ring-slate-700">
+                                        <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_1px_1px,var(--tw-gradient-from)_1px,transparent_0)] from-slate-400 bg-size-[6px_6px] dark:from-slate-500" />
+
                                         <svg
-                                            className='relative h-6 w-6 text-indigo-600 dark:text-indigo-400'
-                                            fill='none'
-                                            viewBox='0 0 24 24'
-                                            stroke='currentColor'
+                                            className="relative h-6 w-6 text-indigo-600 dark:text-indigo-400"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                            stroke="currentColor"
                                         >
                                             <path
-                                                strokeLinecap='round'
-                                                strokeLinejoin='round'
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
                                                 strokeWidth={1.8}
-                                                d='M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A10.003 10.003 0 003.112 13M13 13c1.973 0 3.692 1.232 4.446 2.996m-.896-11.45L13 7m0 0l-1.5-1.5M13 7l1.5-1.5M3 3l3.5 3.5'
+                                                d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A10.003 10.003 0 003.112 13M13 13c1.973 0 3.692 1.232 4.446 2.996m-.896-11.45L13 7m0 0l-1.5-1.5M13 7l1.5-1.5M3 3l3.5 3.5"
                                             />
                                         </svg>
 
-                                        {/* Status Dot */}
-                                        <div className='absolute -bottom-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-white dark:bg-slate-900'>
-                                            <div className='h-2.5 w-2.5 animate-pulse rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)]' />
+                                        <div className="absolute -bottom-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-white dark:bg-slate-900">
+                                            <div className="h-2.5 w-2.5 animate-pulse rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)]" />
                                         </div>
                                     </div>
 
