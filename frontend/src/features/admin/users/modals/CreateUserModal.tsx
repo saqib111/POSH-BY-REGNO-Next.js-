@@ -6,7 +6,7 @@ import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Eye, EyeOff, Loader2, User, Mail, Lock } from "lucide-react";
 import CustomRoleSelect from "./CustomRoleSelect";
-import ModalShell from "./_ModalShell";
+import ModalShell from "../../_ModalShell";
 
 type CreateUserFormValues = {
     name: string;

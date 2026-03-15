@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { FolderTree, Loader2 } from "lucide-react";
-import ModalShell from "./_ModalShell";
+import ModalShell from "../../_ModalShell";
 import type { Category, UpdateCategoryPayload } from "../types";
 
 type UpdateCategoryModalProps = {

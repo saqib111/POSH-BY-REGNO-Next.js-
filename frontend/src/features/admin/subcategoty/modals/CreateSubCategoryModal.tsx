@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { FolderTree, Loader2 } from "lucide-react";
-import ModalShell from "./_ModalShell";
+import ModalShell from "../../_ModalShell";
 import CategoryAsyncSelect from "../components/CategoryAsyncSelect";
 import type { CreateSubCategoryPayload } from "../types";
 

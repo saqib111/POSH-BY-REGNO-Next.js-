@@ -1,7 +1,7 @@
 "use client";
 
 import { Loader2, TriangleAlert } from "lucide-react";
-import ModalShell from "./_ModalShell";
+import ModalShell from "../../_ModalShell";
 
 type ConfirmDeleteCategoryModalProps = {
     open: boolean;

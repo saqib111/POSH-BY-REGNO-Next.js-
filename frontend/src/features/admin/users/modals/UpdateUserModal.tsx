@@ -5,7 +5,7 @@
 import React, { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { Loader2, Mail, User } from "lucide-react";
-import ModalShell from "./_ModalShell";
+import ModalShell from "../../_ModalShell";
 import CustomRoleSelect from "./CustomRoleSelect";
 import type { AdminUser, UpdateUserPayload } from "../types";
 

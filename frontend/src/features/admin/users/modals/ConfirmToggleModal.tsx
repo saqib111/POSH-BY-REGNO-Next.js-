@@ -4,7 +4,7 @@
 
 import React from "react";
 import { Loader2 } from "lucide-react";
-import ModalShell from "./_ModalShell";
+import ModalShell from "../../_ModalShell";
 import type { UserStatus } from "../types";
 
 type Props = {

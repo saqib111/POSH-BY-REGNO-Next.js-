@@ -5,7 +5,7 @@
 import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Eye, EyeOff, Loader2, Lock } from "lucide-react";
-import ModalShell from "./_ModalShell";
+import ModalShell from "../../_ModalShell";
 import type { AdminUser, UpdatePasswordPayload } from "../types";
 
 type Props = {
