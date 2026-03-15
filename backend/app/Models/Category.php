@@ -14,8 +14,8 @@ class Category extends Model
         'status',
     ];
 
-    // public function subCategories()
-    // {
-    //     return $this->hasMany(SubCategories::class, 'category_id');
-    // }
+    public function subCategories()
+    {
+        return $this->hasMany(SubCategories::class, 'category_id');
+    }
 }
