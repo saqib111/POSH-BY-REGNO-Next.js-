@@ -2,9 +2,9 @@
 
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import {
     Crown,
@@ -101,6 +101,7 @@ function GlassInput({
 
 export default function RegisterPage() {
     const router = useRouter();
+    const searchParams = useSearchParams();
     const registerMut = useRegister();
     const [googleLoading, setGoogleLoading] = useState(false);
     const [topError, setTopError] = useState("");
@@ -122,13 +123,22 @@ export default function RegisterPage() {
         mode: "onSubmit", // ✅ validate on submit (not on change)
     });
 
+    useEffect(() => {
+        const googleStatus = searchParams.get("google");
+
+        if (googleStatus === "failed") {
+            setTopError("Google authentication failed. Please try again.");
+            setGoogleLoading(false);
+        }
+    }, [searchParams]);
+
     const password = watch("password");
 
     const handleGoogleRegister = () => {
         if (googleLoading || isSubmitting) return;
         setGoogleLoading(true);
 
-        window.location.href = `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/auth/google/redirect`;
+        window.location.href = `${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/google/redirect`;
     };
 
     const onSubmit = async (data: RegisterForm) => {

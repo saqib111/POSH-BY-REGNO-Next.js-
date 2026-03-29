@@ -3,7 +3,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import {
@@ -58,6 +58,7 @@ export default function LoginPage() {
     const router = useRouter();
     const loginMut = useLogin();
     const meQuery = useMe();
+    const searchParams = useSearchParams();
 
     const [googleLoading, setGoogleLoading] = useState(false);
     const [topError, setTopError] = useState<string>("");
@@ -98,9 +99,19 @@ export default function LoginPage() {
         }
     }, [meQuery.isLoading, meQuery.data, router]);
 
+    useEffect(() => {
+        const googleStatus = searchParams.get("google");
+
+        if (googleStatus === "failed") {
+            setTopError("Google login failed. Please try again.");
+            setGoogleLoading(false);
+        }
+    }, [searchParams]);
+
     const handleGoogleLogin = () => {
+        setTopError("");
         setGoogleLoading(true);
-        window.location.href = `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/auth/google/redirect`;
+        window.location.href = `${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/google/redirect`;
     };
 
     const onSubmit = async (values: LoginForm) => {

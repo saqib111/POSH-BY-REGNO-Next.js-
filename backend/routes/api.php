@@ -3,7 +3,6 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Admin\AdminController;
-use App\Http\Controllers\Auth\GoogleAuthController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\SubCategoriesController;
 use App\Http\Controllers\Admin\ProductsController;
@@ -16,9 +15,6 @@ Route::middleware('throttle:5,1')->group(function () {
     Route::post('/email/verify-otp', [AuthController::class, 'verifyEmailOtp']);
     Route::post('/email/resend-otp', [AuthController::class, 'resendEmailOtp']);
 });
-
-Route::get('/auth/google/redirect', [GoogleAuthController::class, 'redirect']);
-Route::get('/auth/google/callback', [GoogleAuthController::class, 'callback']);
 
 // Reset Password (public)
 Route::middleware('throttle:5,1')->group(function () {
